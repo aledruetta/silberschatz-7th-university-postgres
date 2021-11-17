@@ -15,6 +15,21 @@ INSERT INTO public.department VALUES
 	(	'Music',	'Packard',	80000.00	),
 	(	'Physics',	'Watson',	70000.00	);
 
+DROP TABLE IF EXISTS public.classroom;
+CREATE TABLE public.classroom (
+	building varchar(15),
+	room_number varchar(7),
+	capacity numeric(4,0),
+	PRIMARY KEY (building,room_number)
+);
+
+INSERT INTO public.classroom VALUES 
+	(	'Packard',	'101',	500	),
+	(	'Painter',	'514',	10	),
+	(	'Taylor',	'3128',	70	),
+	(	'Watson',	'100',	30	),
+	(	'Watson',	'120',	50	);
+
 DROP TABLE IF EXISTS public.course;
 CREATE TABLE public.course (
 	course_id varchar(7),
@@ -82,6 +97,50 @@ INSERT INTO public.instructor VALUES
 	(	'83821',	'Brandt',	'Comp. Sci.',	92000.00	),
 	(	'98345',	'Kim',		'Elec. Eng.',	80000.00	);
 
+DROP TABLE IF EXISTS public.student;
+CREATE TABLE public.student (
+	ID varchar(5),
+	name varchar(20),
+	dept_name varchar(20),
+	tot_cred decimal(3,0),
+	PRIMARY KEY (ID),
+	FOREIGN KEY (dept_name) references public.department
+);
+
+INSERT INTO public.student VALUES 
+	(	'00128',	'Zhang',	'Comp. Sci.',	102	),
+	(	'12345',	'Shankar',	'Comp. Sci.',	32	),
+	(	'19991',	'Brandt',	'History',	80	),
+	(	'23121',	'Chavez',	'Finance',	110	),
+	(	'44553',	'Peltier',	'Physics',	56	),
+	(	'45678',	'Levy',		'Physics',	46	),
+	(	'54321',	'Williams',	'Comp. Sci.',	54	),
+	(	'55739',	'Sanchez',	'Music',	38	),
+	(	'70557',	'Snow',		'Physics',	0	),
+	(	'76543',	'Brown',	'Comp. Sci.',	58	),
+	(	'76653',	'Aoi',		'Elec. Eng.',	60	),
+	(	'98765',	'Bourikas',	'Elec. Eng.',	98	),
+	(	'98988',	'Tanaka',	'Biology',	120	);
+
+DROP TABLE IF EXISTS public.advisor;
+CREATE TABLE public.advisor (
+	s_ID varchar(5),
+	i_ID varchar(5),
+	PRIMARY KEY (s_ID),
+	FOREIGN KEY (i_ID) references public.instructor,
+	FOREIGN KEY (s_ID) references public.student
+);
+
+INSERT INTO public.advisor VALUES 
+	(	'12345',	'10101'	),
+	(	'44553',	'22222'	),
+	(	'45678',	'22222'	),
+	(	'00128',	'45565'	),
+	(	'76543',	'45565'	),
+	(	'23121',	'76543'	),
+	(	'98988',	'76766'	),
+	(	'76653',	'98345'	),
+	(	'98765',	'98345'	);
 
 DROP TABLE IF EXISTS public.section;
 CREATE TABLE public.section (
