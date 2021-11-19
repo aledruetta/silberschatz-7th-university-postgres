@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
   
   config.vm.provider "virtualbox" do |vb|
-    vb.name = "postgres-server"
+    vb.name = "university_db"
     vb.gui = false
     vb.memory = "2048"
   end
