@@ -20,3 +20,9 @@ sudo -u postgres psql university < university.sql
 sudo -u postgres pg_dump university > dump.sql
 ```
 
+## Query
+
+```bash
+sudo -u postgres psql university
+```
+
