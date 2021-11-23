@@ -130,6 +130,22 @@ CREATE TABLE public.student (
 ALTER TABLE public.student OWNER TO postgres;
 
 --
+-- Name: takes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.takes (
+    id character varying(5) NOT NULL,
+    course_id character varying(8) NOT NULL,
+    sec_id character varying(8),
+    semester character varying(6) NOT NULL,
+    year numeric(4,0) NOT NULL,
+    grade character varying(2)
+);
+
+
+ALTER TABLE public.takes OWNER TO postgres;
+
+--
 -- Name: teaches; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -290,6 +306,36 @@ COPY public.student (id, name, dept_name, tot_cred) FROM stdin;
 
 
 --
+-- Data for Name: takes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.takes (id, course_id, sec_id, semester, year, grade) FROM stdin;
+00128	CS-101	1	Fall	2017	A
+00128	CS-347	1	Fall	2017	A-
+12345	CS-101	1	Fall	2017	C
+12345	CS-190	2	Spring	2017	A
+12345	CS-315	1	Spring	2018	A
+12345	CS-347	1	Fall	2017	A
+19991	HIS-351	1	Spring	2018	B
+23121	FIN-201	1	Spring	2018	C+
+44553	PHY-101	1	Fall	2017	B-
+45678	CS-101	1	Fall	2017	F
+45678	CS-101	1	Spring	2018	B+
+45678	CS-319	1	Spring	2018	B
+54321	CS-101	1	Fall	2017	A-
+54321	CS-190	2	Spring	2017	B+
+55739	MU-199	1	Spring	2018	A-
+76543	CS-101	1	Fall	2017	A
+76543	CS-319	2	Spring	2018	A
+76653	EE-181	1	Spring	2017	C
+98765	CS-101	1	Fall	2017	C-
+98765	CS-315	1	Spring	2018	B
+98988	BIO-101	1	Summer	2017	A
+98988	BIO-301	1	Summer	2018	\N
+\.
+
+
+--
 -- Data for Name: teaches; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -377,6 +423,14 @@ ALTER TABLE ONLY public.student
 
 
 --
+-- Name: takes takes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.takes
+    ADD CONSTRAINT takes_pkey PRIMARY KEY (id, course_id, semester, year);
+
+
+--
 -- Name: teaches teaches_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -446,6 +500,22 @@ ALTER TABLE ONLY public.section
 
 ALTER TABLE ONLY public.student
     ADD CONSTRAINT student_dept_name_fkey FOREIGN KEY (dept_name) REFERENCES public.department(dept_name);
+
+
+--
+-- Name: takes takes_course_id_sec_id_semester_year_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.takes
+    ADD CONSTRAINT takes_course_id_sec_id_semester_year_fkey FOREIGN KEY (course_id, sec_id, semester, year) REFERENCES public.section(course_id, sec_id, semester, year);
+
+
+--
+-- Name: takes takes_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.takes
+    ADD CONSTRAINT takes_id_fkey FOREIGN KEY (id) REFERENCES public.student(id);
 
 
 --

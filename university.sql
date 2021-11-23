@@ -172,6 +172,42 @@ INSERT INTO public.section VALUES
 	(	'MU-199',	'1',	'Spring',	2018,	'Packard',	'101',	'D'	),
 	(	'PHY-101',	'1',	'Fall',		2017,	'Watson',	'100',	'A'	);
 
+DROP TABLE IF EXISTS public.takes;
+CREATE TABLE public.takes (
+	ID varchar(5),
+	course_id varchar(8),
+	sec_id varchar(8),
+	semester varchar(6),
+	year decimal(4,0),
+	grade varchar(2),
+	PRIMARY KEY (ID,course_id,semester,year),
+	FOREIGN KEY (course_id,sec_id,semester,year) REFERENCES public.section,
+	FOREIGN KEY (ID) REFERENCES public.student
+);
+
+INSERT INTO public.takes VALUES 
+	(	'00128',	'CS-101',	'1',	'Fall',		2017,	'A'	),
+	(	'00128',	'CS-347',	'1',	'Fall',		2017,	'A-'	),
+	(	'12345',	'CS-101',	'1',	'Fall',		2017,	'C'	),
+	(	'12345',	'CS-190',	'2',	'Spring',	2017,	'A'	),
+	(	'12345',	'CS-315',	'1',	'Spring',	2018,	'A'	),
+	(	'12345',	'CS-347',	'1',	'Fall',		2017,	'A'	),
+	(	'19991',	'HIS-351',	'1',	'Spring',	2018,	'B'	),
+	(	'23121',	'FIN-201',	'1',	'Spring',	2018,	'C+'	),
+	(	'44553',	'PHY-101',	'1',	'Fall',		2017,	'B-'	),
+	(	'45678',	'CS-101',	'1',	'Fall',		2017,	'F'	),
+	(	'45678',	'CS-101',	'1',	'Spring',	2018,	'B+'	),
+	(	'45678',	'CS-319',	'1',	'Spring',	2018,	'B'	),
+	(	'54321',	'CS-101',	'1',	'Fall',		2017,	'A-'	),
+	(	'54321',	'CS-190',	'2',	'Spring',	2017,	'B+'	),
+	(	'55739',	'MU-199',	'1',	'Spring',	2018,	'A-'	),
+	(	'76543',	'CS-101',	'1',	'Fall',		2017,	'A'	),
+	(	'76543',	'CS-319',	'2',	'Spring',	2018,	'A'	),
+	(	'76653',	'EE-181',	'1',	'Spring',	2017,	'C'	),
+	(	'98765',	'CS-101',	'1',	'Fall',		2017,	'C-'	),
+	(	'98765',	'CS-315',	'1',	'Spring',	2018,	'B'	),
+	(	'98988',	'BIO-101',	'1',	'Summer',	2017,	'A'	),
+	(	'98988',	'BIO-301',	'1',	'Summer',	2018,	NULL	);
 
 DROP TABLE IF EXISTS public.teaches;
 CREATE TABLE public.teaches (
