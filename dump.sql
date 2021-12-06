@@ -50,10 +50,11 @@ ALTER TABLE public.classroom OWNER TO postgres;
 --
 
 CREATE TABLE public.course (
-    course_id character varying(7) NOT NULL,
+    course_id character varying(8) NOT NULL,
     title character varying(50),
     dept_name character varying(20),
-    credits numeric(2,0)
+    credits numeric(2,0),
+    CONSTRAINT course_credits_check CHECK ((credits > (0)::numeric))
 );
 
 
@@ -66,7 +67,8 @@ ALTER TABLE public.course OWNER TO postgres;
 CREATE TABLE public.department (
     dept_name character varying(20) NOT NULL,
     building character varying(15),
-    budget numeric(12,2)
+    budget numeric(12,2),
+    CONSTRAINT department_budget_check CHECK ((budget > (0)::numeric))
 );
 
 
@@ -80,7 +82,8 @@ CREATE TABLE public.instructor (
     id character varying(5) NOT NULL,
     name character varying(20) NOT NULL,
     dept_name character varying(20),
-    salary numeric(8,2)
+    salary numeric(8,2),
+    CONSTRAINT instructor_salary_check CHECK ((salary > (29000)::numeric))
 );
 
 
@@ -91,8 +94,8 @@ ALTER TABLE public.instructor OWNER TO postgres;
 --
 
 CREATE TABLE public.prereq (
-    course_id character varying(7) NOT NULL,
-    prereq_id character varying(7) NOT NULL
+    course_id character varying(8) NOT NULL,
+    prereq_id character varying(8) NOT NULL
 );
 
 
@@ -109,7 +112,9 @@ CREATE TABLE public.section (
     year numeric(4,0) NOT NULL,
     building character varying(15),
     room_number character varying(7),
-    time_slot_id character varying(4)
+    time_slot_id character varying(4),
+    CONSTRAINT section_semester_check CHECK (((semester)::text = ANY ((ARRAY['Fall'::character varying, 'Winter'::character varying, 'Spring'::character varying, 'Summer'::character varying])::text[]))),
+    CONSTRAINT section_year_check CHECK (((year > (1701)::numeric) AND (year < (2100)::numeric)))
 );
 
 
@@ -121,9 +126,10 @@ ALTER TABLE public.section OWNER TO postgres;
 
 CREATE TABLE public.student (
     id character varying(5) NOT NULL,
-    name character varying(20),
+    name character varying(20) NOT NULL,
     dept_name character varying(20),
-    tot_cred numeric(3,0)
+    tot_cred numeric(3,0),
+    CONSTRAINT student_tot_cred_check CHECK ((tot_cred >= (0)::numeric))
 );
 
 
@@ -136,7 +142,7 @@ ALTER TABLE public.student OWNER TO postgres;
 CREATE TABLE public.takes (
     id character varying(5) NOT NULL,
     course_id character varying(8) NOT NULL,
-    sec_id character varying(8),
+    sec_id character varying(8) NOT NULL,
     semester character varying(6) NOT NULL,
     year numeric(4,0) NOT NULL,
     grade character varying(2)
@@ -161,19 +167,39 @@ CREATE TABLE public.teaches (
 ALTER TABLE public.teaches OWNER TO postgres;
 
 --
+-- Name: time_slot; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.time_slot (
+    time_slot_id character varying(4) NOT NULL,
+    day character varying(1) NOT NULL,
+    start_hr numeric(2,0) NOT NULL,
+    start_min numeric(2,0) NOT NULL,
+    end_hr numeric(2,0),
+    end_min numeric(2,0),
+    CONSTRAINT time_slot_end_hr_check CHECK (((end_hr >= (0)::numeric) AND (end_hr < (24)::numeric))),
+    CONSTRAINT time_slot_end_min_check CHECK (((end_min >= (0)::numeric) AND (end_min < (60)::numeric))),
+    CONSTRAINT time_slot_start_hr_check CHECK (((start_hr >= (0)::numeric) AND (start_hr < (24)::numeric))),
+    CONSTRAINT time_slot_start_min_check CHECK (((start_min >= (0)::numeric) AND (start_min < (60)::numeric)))
+);
+
+
+ALTER TABLE public.time_slot OWNER TO postgres;
+
+--
 -- Data for Name: advisor; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.advisor (s_id, i_id) FROM stdin;
+00128	45565
 12345	10101
+23121	76543
 44553	22222
 45678	22222
-00128	45565
 76543	45565
-23121	76543
-98988	76766
 76653	98345
 98765	98345
+98988	76766
 \.
 
 
@@ -203,7 +229,7 @@ CS-190	Game Design	Comp. Sci.	4
 CS-315	Robotics	Comp. Sci.	3
 CS-319	Image Processing	Comp. Sci.	3
 CS-347	Database System Concepts	Comp. Sci.	3
-EE-181	Intro. to Digital Systems	Comp. Sci.	3
+EE-181	Intro. to Digital Systems	Elec. Eng.	3
 FIN-201	Investment Banking	Finance	3
 HIS-351	World History	History	3
 MU-199	Music Video Production	Music	3
@@ -359,6 +385,34 @@ COPY public.teaches (id, course_id, sec_id, semester, year) FROM stdin;
 
 
 --
+-- Data for Name: time_slot; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.time_slot (time_slot_id, day, start_hr, start_min, end_hr, end_min) FROM stdin;
+A	M	8	0	8	50
+A	W	8	0	8	50
+A	F	8	0	8	50
+B	M	9	0	9	50
+B	W	9	0	9	50
+B	F	9	0	9	50
+C	M	11	0	11	50
+C	W	11	0	11	50
+C	F	11	0	11	50
+D	M	13	0	13	50
+D	W	13	0	13	50
+D	F	13	0	13	50
+E	T	10	30	11	45
+E	R	10	30	11	45
+F	T	14	30	15	45
+F	R	14	30	15	45
+G	M	16	0	16	50
+G	W	16	0	16	50
+G	F	16	0	16	50
+H	W	10	0	12	30
+\.
+
+
+--
 -- Name: advisor advisor_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -427,7 +481,7 @@ ALTER TABLE ONLY public.student
 --
 
 ALTER TABLE ONLY public.takes
-    ADD CONSTRAINT takes_pkey PRIMARY KEY (id, course_id, semester, year);
+    ADD CONSTRAINT takes_pkey PRIMARY KEY (id, course_id, sec_id, semester, year);
 
 
 --
@@ -439,11 +493,19 @@ ALTER TABLE ONLY public.teaches
 
 
 --
+-- Name: time_slot time_slot_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.time_slot
+    ADD CONSTRAINT time_slot_pkey PRIMARY KEY (time_slot_id, day, start_hr, start_min);
+
+
+--
 -- Name: advisor advisor_i_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.advisor
-    ADD CONSTRAINT advisor_i_id_fkey FOREIGN KEY (i_id) REFERENCES public.instructor(id);
+    ADD CONSTRAINT advisor_i_id_fkey FOREIGN KEY (i_id) REFERENCES public.instructor(id) ON DELETE SET NULL;
 
 
 --
@@ -451,7 +513,7 @@ ALTER TABLE ONLY public.advisor
 --
 
 ALTER TABLE ONLY public.advisor
-    ADD CONSTRAINT advisor_s_id_fkey FOREIGN KEY (s_id) REFERENCES public.student(id);
+    ADD CONSTRAINT advisor_s_id_fkey FOREIGN KEY (s_id) REFERENCES public.student(id) ON DELETE CASCADE;
 
 
 --
@@ -459,7 +521,7 @@ ALTER TABLE ONLY public.advisor
 --
 
 ALTER TABLE ONLY public.course
-    ADD CONSTRAINT course_dept_name_fkey FOREIGN KEY (dept_name) REFERENCES public.department(dept_name);
+    ADD CONSTRAINT course_dept_name_fkey FOREIGN KEY (dept_name) REFERENCES public.department(dept_name) ON DELETE SET NULL;
 
 
 --
@@ -467,7 +529,7 @@ ALTER TABLE ONLY public.course
 --
 
 ALTER TABLE ONLY public.instructor
-    ADD CONSTRAINT instructor_dept_name_fkey FOREIGN KEY (dept_name) REFERENCES public.department(dept_name);
+    ADD CONSTRAINT instructor_dept_name_fkey FOREIGN KEY (dept_name) REFERENCES public.department(dept_name) ON DELETE SET NULL;
 
 
 --
@@ -475,7 +537,7 @@ ALTER TABLE ONLY public.instructor
 --
 
 ALTER TABLE ONLY public.prereq
-    ADD CONSTRAINT prereq_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.course(course_id);
+    ADD CONSTRAINT prereq_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.course(course_id) ON DELETE CASCADE;
 
 
 --
@@ -487,11 +549,19 @@ ALTER TABLE ONLY public.prereq
 
 
 --
+-- Name: section section_building_room_number_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.section
+    ADD CONSTRAINT section_building_room_number_fkey FOREIGN KEY (building, room_number) REFERENCES public.classroom(building, room_number) ON DELETE SET NULL;
+
+
+--
 -- Name: section section_course_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.section
-    ADD CONSTRAINT section_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.course(course_id);
+    ADD CONSTRAINT section_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.course(course_id) ON DELETE CASCADE;
 
 
 --
@@ -499,7 +569,7 @@ ALTER TABLE ONLY public.section
 --
 
 ALTER TABLE ONLY public.student
-    ADD CONSTRAINT student_dept_name_fkey FOREIGN KEY (dept_name) REFERENCES public.department(dept_name);
+    ADD CONSTRAINT student_dept_name_fkey FOREIGN KEY (dept_name) REFERENCES public.department(dept_name) ON DELETE SET NULL;
 
 
 --
@@ -507,7 +577,7 @@ ALTER TABLE ONLY public.student
 --
 
 ALTER TABLE ONLY public.takes
-    ADD CONSTRAINT takes_course_id_sec_id_semester_year_fkey FOREIGN KEY (course_id, sec_id, semester, year) REFERENCES public.section(course_id, sec_id, semester, year);
+    ADD CONSTRAINT takes_course_id_sec_id_semester_year_fkey FOREIGN KEY (course_id, sec_id, semester, year) REFERENCES public.section(course_id, sec_id, semester, year) ON DELETE CASCADE;
 
 
 --
@@ -515,7 +585,7 @@ ALTER TABLE ONLY public.takes
 --
 
 ALTER TABLE ONLY public.takes
-    ADD CONSTRAINT takes_id_fkey FOREIGN KEY (id) REFERENCES public.student(id);
+    ADD CONSTRAINT takes_id_fkey FOREIGN KEY (id) REFERENCES public.student(id) ON DELETE CASCADE;
 
 
 --
@@ -523,7 +593,7 @@ ALTER TABLE ONLY public.takes
 --
 
 ALTER TABLE ONLY public.teaches
-    ADD CONSTRAINT teaches_course_id_sec_id_semester_year_fkey FOREIGN KEY (course_id, sec_id, semester, year) REFERENCES public.section(course_id, sec_id, semester, year);
+    ADD CONSTRAINT teaches_course_id_sec_id_semester_year_fkey FOREIGN KEY (course_id, sec_id, semester, year) REFERENCES public.section(course_id, sec_id, semester, year) ON DELETE CASCADE;
 
 
 --
@@ -531,7 +601,7 @@ ALTER TABLE ONLY public.teaches
 --
 
 ALTER TABLE ONLY public.teaches
-    ADD CONSTRAINT teaches_id_fkey FOREIGN KEY (id) REFERENCES public.instructor(id);
+    ADD CONSTRAINT teaches_id_fkey FOREIGN KEY (id) REFERENCES public.instructor(id) ON DELETE CASCADE;
 
 
 --

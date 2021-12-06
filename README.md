@@ -14,6 +14,12 @@ CREATE DATABASE university;
 sudo -u postgres psql university < university.sql
 ```
 
+Or
+
+```bash
+sudo -u postgres psql university < dump.sql
+```
+
 ## Dump
 
 ```bash
